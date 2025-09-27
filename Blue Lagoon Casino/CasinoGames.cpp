@@ -33,8 +33,152 @@ void coefficientCalc(Coefficient* a, string* result, double bet, Clients* client
     }
 }
 void blackjac(string login) {
+    string ranks[] = { "2","3","4","5","6","7","8","9","10","J","Q","K","A" };
+    string deck[312];
+    int index = 0;
 
+    for (int d = 0; d < 6; d++) {
+        for (int r = 0; r < 13; r++) {
+            for (int i = 0; i < 4; i++) {
+                deck[index++] = ranks[r];
+            }
+        }
+    }
+    int playerDeckSize = 2, dealerDeckSize = 2;
+    string* hand = new string[dealerDeckSize];
+    string* playerHand = new string[playerDeckSize];
+
+    hand[0] = deck[rand() % 312];
+    hand[1] = deck[rand() % 312];
+    playerHand[0] = deck[rand() % 312];
+    playerHand[1] = deck[rand() % 312];
+
+    bool playerTurn = true;
+
+    while (true) {
+        system("cls");
+        cout << "==============================\n"
+            << "|       \033[36mBLACKJACK\033[0m         |\n"
+            << "==============================\n"
+            << "| Dealer: [hidden] ";
+        for (int i = 1; i < dealerDeckSize; i++) {
+            cout << hand[i] << " ";
+        }
+        cout << "\n------------------------------\n"
+            << "| Player: ";
+        for (int i = 0; i < playerDeckSize; i++) {
+            cout << playerHand[i] << " ";
+        }
+        cout << "\n==============================\n";
+        string user;
+        if (playerTurn) {
+            cout << "Choose your action:\n"
+                << "[1] Hit\n"
+                << "[2] Stand\n"
+                << "------------------------------\n";
+            cin >> user;
+            if (user == "1") {
+                string* newPlayerHand = new string[playerDeckSize + 1];
+                for (int i = 0; i < playerDeckSize; i++)
+                    newPlayerHand[i] = playerHand[i];
+                delete[] playerHand;
+                playerHand = newPlayerHand;
+                playerHand[playerDeckSize] = deck[rand() % 312];
+                playerDeckSize++;
+            }
+            else if (user == "2") {
+                playerTurn = false;
+            }
+            else continue;
+        }
+        int checkP = 0;
+        int acesP = 0;
+        for (int i = 0; i < playerDeckSize; i++) {
+            if (playerHand[i] == "J" || playerHand[i] == "Q" || playerHand[i] == "K") checkP += 10;
+            else if (playerHand[i] == "A") acesP++;
+            else checkP += stoi(playerHand[i]);
+        }
+        checkP += acesP;
+        if (acesP > 0 && checkP + 10 <= 21) checkP += 10;
+        if (checkP > 21) {
+            cout << "==============================\n"
+                << "|        \033[31mYOU BUST!\033[0m        |\n"
+                << "==============================\n";
+            this_thread::sleep_for(chrono::seconds(2));
+            playerTurn = false;
+        }
+        if (!playerTurn) {
+            int checkD = 0;
+            int acesD = 0;
+            for (int i = 0; i < dealerDeckSize; i++) {
+                if (hand[i] == "J" || hand[i] == "Q" || hand[i] == "K") checkD += 10;
+                else if (hand[i] == "A") acesD++;
+                else checkD += stoi(hand[i]);
+            }
+            checkD += acesD;
+            if (acesD > 0 && checkD + 10 <= 21) checkD += 10;
+            while (checkD < 17) {
+                string* newHand = new string[dealerDeckSize + 1];
+                for (int i = 0; i < dealerDeckSize; i++)
+                    newHand[i] = hand[i];
+                delete[] hand;
+                hand = newHand;
+                hand[dealerDeckSize] = deck[rand() % 312];
+                dealerDeckSize++;
+                checkD = 0;
+                acesD = 0;
+                for (int i = 0; i < dealerDeckSize; i++) {
+                    if (hand[i] == "J" || hand[i] == "Q" || hand[i] == "K") checkD += 10;
+                    else if (hand[i] == "A") acesD++;
+                    else checkD += stoi(hand[i]);
+                }
+                checkD += acesD;
+                if (acesD > 0 && checkD + 10 <= 21) checkD += 10;
+            }
+            cout << "Dealer's cards: ";
+            for (int i = 0; i < dealerDeckSize; i++)
+                cout << hand[i] << " ";
+            cout << "\nYour cards: ";
+            for (int i = 0; i < playerDeckSize; i++)
+                cout << playerHand[i] << " ";
+            cout << "\n==============================\n";
+            int checkDTotal = 0;
+            acesD = 0;
+            for (int i = 0; i < dealerDeckSize; i++) {
+                if (hand[i] == "J" || hand[i] == "Q" || hand[i] == "K") checkDTotal += 10;
+                else if (hand[i] == "A") acesD++;
+                else checkDTotal += stoi(hand[i]);
+            }
+            checkDTotal += acesD;
+            if (acesD > 0 && checkDTotal + 10 <= 21) checkDTotal += 10;
+
+            bool playerBlackjack = (playerDeckSize == 2 && checkP == 21);
+            bool dealerBlackjack = (dealerDeckSize == 2 && checkDTotal == 21);
+
+            if (playerBlackjack && dealerBlackjack) cout << "|        \033[31mYOU LOSE!\033[0m         |\n";
+            else if (playerBlackjack) cout << "|        \033[32mYOU WIN!\033[0m         |\n";
+            else if (dealerBlackjack) cout << "|        \033[31mYOU LOSE!\033[0m         |\n";
+            else if (checkP > 21) cout << "|        \033[31mYOU LOSE!\033[0m         |\n";
+            else if (checkDTotal > 21) cout << "|        \033[32mYOU WIN!\033[0m         |\n";
+            else if (checkP > checkDTotal) cout << "|        \033[32mYOU WIN!\033[0m         |\n";
+            else if (checkP < checkDTotal) cout << "|        \033[31mYOU LOSE!\033[0m         |\n";
+            else cout << "|        \033[33mDRAW!\033[0m             |\n";
+            cout << "==============================\n";
+
+            this_thread::sleep_for(chrono::seconds(2));
+            break;
+        }
+    }
+    delete[] playerHand;
+    delete[] hand;
+    string playAgain;
+    cout << "\nDo you want to play again? (y/n): ";
+    cin >> playAgain;
+    if (playAgain == "y" || playAgain == "Y") {
+        blackjac(login);
+    }
 }
+
 void slots(string login) {
     const int reels = 3, size = 5;
     const string symbols[size]{ "@", "$", "&", "*", "7" };
@@ -218,6 +362,7 @@ void displaySimonGrid(int& score, string login) {
     EditClientsData(clients, clientCount, game, login, a, bet, coefficient);
     delete[] clients;
     delete[] arr;
+    delete[] arr3;
     this_thread::sleep_for(chrono::seconds(3));
 }
 void simon(string login) {
@@ -261,7 +406,7 @@ void CasinoGamesMenu(string login) {
             << "Enter the number of your choice: ";
         cin.ignore();
         cin >> user;
-        int a = 0,  clientCount;
+        int a = 0, clientCount;
         Clients* clients = TempolaryDatabase(clientCount);
         if (user == 1) blackjac(login);
         else if (user == 2) slots(login);
