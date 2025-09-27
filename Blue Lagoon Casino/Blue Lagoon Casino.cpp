@@ -12,7 +12,7 @@ int main()
     cout << "===============================\n"
         << "   \033[36mWelcome to the Casino App\033[0m   \n"
         << "===============================\n";
-    int user = 0;
+    long long int user = 0;
     while (user != 1 && user != 2) {
         cout << "Are you a new player or existing?\n";
         cout << "1. New player\n2. Existing player\nChoose 1 or 2: ";
@@ -80,6 +80,7 @@ int main()
         newClients[size].totalGamesPlayed = 0;
         newClients[size].blackjackPlayed = 0;
         newClients[size].blackjackWon = 0;
+        newClients[size].blackjackDraw = 0;
         newClients[size].slotsPlayed = 0;
         newClients[size].slotWon = 0;
         newClients[size].simonPlayed = 0;
@@ -120,8 +121,8 @@ int main()
             attempts++;
         }
     }
-    int clientCount;
+    int clientCount, minMoneyToEnter = 100;
     clients = TempolaryDatabase(clientCount);
-    CheckingMoney(clients, login, clientCount);
+    CheckingMoney(clients, login, clientCount, minMoneyToEnter);
     CasinoGamesMenu(login);
 }

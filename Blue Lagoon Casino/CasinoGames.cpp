@@ -53,8 +53,28 @@ void blackjac(string login) {
     playerHand[0] = deck[rand() % 312];
     playerHand[1] = deck[rand() % 312];
 
-    bool playerTurn = true;
+    bool playerTurn = true, win = true;
+    long long int bet = 0;
+    int clientCount;
+    Clients* clients = TempolaryDatabase(clientCount);
 
+    while (bet < 20) {
+        system("cls");
+        cout << "Enter your bet (minimum 20): ";
+        cin >> bet;
+        for (int i = 0; i < clientCount; i++) {
+            Clients& w = clients[i];
+            if (w.login == login) {
+                if (bet > w.balance) {
+                    cout << "Not enough funds! Your balance: " << w.balance << "\n";
+                    bet = 0;
+                    this_thread::sleep_for(chrono::milliseconds(1400));
+                }
+                break;
+            }
+        }
+    }
+    int coefficient = bet;
     while (true) {
         system("cls");
         cout << "==============================\n"
@@ -98,12 +118,16 @@ void blackjac(string login) {
             else if (playerHand[i] == "A") acesP++;
             else checkP += stoi(playerHand[i]);
         }
-        checkP += acesP;
-        if (acesP > 0 && checkP + 10 <= 21) checkP += 10;
+        checkP += acesP * 11;
+        while (checkP > 21 && acesP > 0) {
+            checkP -= 10;
+            --acesP;
+        }
         if (checkP > 21) {
             cout << "==============================\n"
                 << "|        \033[31mYOU BUST!\033[0m        |\n"
                 << "==============================\n";
+            
             this_thread::sleep_for(chrono::seconds(2));
             playerTurn = false;
         }
@@ -115,7 +139,11 @@ void blackjac(string login) {
                 else if (hand[i] == "A") acesD++;
                 else checkD += stoi(hand[i]);
             }
-            checkD += acesD;
+            checkD += acesD * 11;
+            while (checkD > 21 && acesD > 0) {
+                checkD -= 10;
+                --acesD;
+            }
             if (acesD > 0 && checkD + 10 <= 21) checkD += 10;
             while (checkD < 17) {
                 string* newHand = new string[dealerDeckSize + 1];
@@ -132,9 +160,13 @@ void blackjac(string login) {
                     else if (hand[i] == "A") acesD++;
                     else checkD += stoi(hand[i]);
                 }
-                checkD += acesD;
-                if (acesD > 0 && checkD + 10 <= 21) checkD += 10;
+                checkD += acesD * 11;
+                while (checkD > 21 && acesD > 0) {
+                    checkD -= 10;
+                    --acesD;
+                }
             }
+            this_thread::sleep_for(chrono::seconds(1));
             cout << "Dealer's cards: ";
             for (int i = 0; i < dealerDeckSize; i++)
                 cout << hand[i] << " ";
@@ -142,29 +174,44 @@ void blackjac(string login) {
             for (int i = 0; i < playerDeckSize; i++)
                 cout << playerHand[i] << " ";
             cout << "\n==============================\n";
-            int checkDTotal = 0;
-            acesD = 0;
+            int checkDTotal = 0, acesDtotal = 0;
             for (int i = 0; i < dealerDeckSize; i++) {
                 if (hand[i] == "J" || hand[i] == "Q" || hand[i] == "K") checkDTotal += 10;
-                else if (hand[i] == "A") acesD++;
+                else if (hand[i] == "A") acesDtotal++;
                 else checkDTotal += stoi(hand[i]);
             }
-            checkDTotal += acesD;
-            if (acesD > 0 && checkDTotal + 10 <= 21) checkDTotal += 10;
+            checkDTotal += acesDtotal * 11;
+            while (checkDTotal > 21 && acesDtotal > 0) {
+                checkDTotal -= 10;
+                --acesDtotal;
+            }
 
             bool playerBlackjack = (playerDeckSize == 2 && checkP == 21);
             bool dealerBlackjack = (dealerDeckSize == 2 && checkDTotal == 21);
 
-            if (playerBlackjack && dealerBlackjack) cout << "|        \033[31mYOU LOSE!\033[0m         |\n";
-            else if (playerBlackjack) cout << "|        \033[32mYOU WIN!\033[0m         |\n";
-            else if (dealerBlackjack) cout << "|        \033[31mYOU LOSE!\033[0m         |\n";
-            else if (checkP > 21) cout << "|        \033[31mYOU LOSE!\033[0m         |\n";
-            else if (checkDTotal > 21) cout << "|        \033[32mYOU WIN!\033[0m         |\n";
-            else if (checkP > checkDTotal) cout << "|        \033[32mYOU WIN!\033[0m         |\n";
-            else if (checkP < checkDTotal) cout << "|        \033[31mYOU LOSE!\033[0m         |\n";
-            else cout << "|        \033[33mDRAW!\033[0m             |\n";
-            cout << "==============================\n";
-
+            if (playerBlackjack && !dealerBlackjack) {
+                bet = bet * 1.5;
+                cout << "YOU WIN (Blackjack)!\n";
+                cout << "You won " << bet << " chips!\n";
+            }
+            else if (!playerBlackjack && checkP <= 21 && (checkDTotal > 21 || checkP > checkDTotal)) {
+                cout << "YOU WIN!\n";
+                cout << "You won " << bet * 2 << " chips!\n";
+            }
+            else if (checkP > 21 || (!playerBlackjack && checkP < checkDTotal && checkDTotal <= 21)) {
+                win = false;
+                cout << "YOU LOSE!\n";
+                cout << "You lost " << bet << " chips.\n";
+            }
+            else {
+                cout << "DRAW!\n";
+                cout << "Your bet is returned: " << bet << " chips.\n";
+                bet = 0;
+                coefficient = 0;
+                win = false;
+            }
+            string game = "blackjac";
+            EditClientsData(clients, clientCount, game, login, win, bet, coefficient);
             this_thread::sleep_for(chrono::seconds(2));
             break;
         }
@@ -193,7 +240,8 @@ void slots(string login) {
     };
     int clientCount;
     Clients* clients = TempolaryDatabase(clientCount);
-    CheckingMoney(clients, login, clientCount);
+    int bet = 100;
+    CheckingMoney(clients, login, clientCount, bet);
     for (int i = 0; i < 7; i++) {
         this_thread::sleep_for(chrono::milliseconds(300));
         system("cls");
@@ -216,7 +264,6 @@ void slots(string login) {
     else
         cout << "|\033[31m Better luck next  \033[0m|" << endl;
     cout << "=====================" << endl;
-    double bet = 100;
     coefficientCalc(coefficient, result, bet, clients, clientCount, login);
     int player = 0;
     for (int i = 0; i < clientCount; i++) {
@@ -235,12 +282,12 @@ void slots(string login) {
     cout << "[1] Yes, spin again\n";
     cout << "[2] No, return to menu\n";
     cout << "---------------------\n";
-    int restart;
-    cin >> restart;
-    if (restart == 1 || restart == 11 || restart == 111) {
+    string restart;
+    cin.ignore();
+    restart = _getch();
+    if (restart == "1") {
         slots(login);
     }
-    cin.ignore();
 }
 void displaySimonGrid(int& score, string login) {
     system("cls");
@@ -250,9 +297,9 @@ void displaySimonGrid(int& score, string login) {
     string* arr3 = nullptr;
     bool playing = true;
 
-    int clientCount;
+    int clientCount, bet = 100;
     Clients* clients = TempolaryDatabase(clientCount);
-    CheckingMoney(clients, login, clientCount);
+    CheckingMoney(clients, login, clientCount, bet);
 
     while (playing) {
         string* newArr3 = new string[size + 1];
@@ -357,7 +404,6 @@ void displaySimonGrid(int& score, string login) {
     }
     string game{ "simon" };
     bool a = true;
-    int bet = 100;
     double coefficient = score;
     EditClientsData(clients, clientCount, game, login, a, bet, coefficient);
     delete[] clients;
@@ -389,6 +435,7 @@ void simon(string login) {
 }
 void CasinoGamesMenu(string login) {
     int user;
+    cin.ignore();
     do
     {
         system("cls");
@@ -404,7 +451,6 @@ void CasinoGamesMenu(string login) {
             << "[5] Exit\n"
             << "------------------------------------\n"
             << "Enter the number of your choice: ";
-        cin.ignore();
         cin >> user;
         int a = 0, clientCount;
         Clients* clients = TempolaryDatabase(clientCount);

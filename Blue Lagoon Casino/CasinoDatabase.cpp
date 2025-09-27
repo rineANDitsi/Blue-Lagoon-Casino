@@ -14,11 +14,11 @@ int SizeOfFile() {
     fin.close();
     return size;
 }
-void CheckingMoney(Clients* client, string login, int size) {
+void CheckingMoney(Clients* client, string login, int size, int bet) {
     for (int i = 0; i < size; i++) {
         Clients& w = client[i];
         if (w.login == login) {
-            if (w.balance < 100) {
+            if (w.balance <= 0) {
                 do
                 {
                     system("cls");
@@ -55,7 +55,8 @@ void userStatistics(Clients* client, int size, string login) {
                 << "\033[32mTotal Wins:\033[0m " << (w.blackjackWon + w.slotWon) << "\n"
                 << "------------------------------\n"
                 << "\033[35mBlackjack:\033[0m " << w.blackjackPlayed
-                << " played, " << w.blackjackWon << " won\n"
+                << " played, " << w.blackjackWon << " won, " 
+                << w.blackjackDraw << " draw\n"
                 << "\033[35mSlots:\033[0m " << w.slotsPlayed
                 << " played, " << w.slotWon << " won\n"
                 << "\033[35mSimon:\033[0m " << w.simonPlayed
@@ -94,6 +95,19 @@ void EditClientsData(Clients* client, int size, string game, string login, bool 
                 w.balance += (20 * coefficient) - bet;
                 if (((20 * coefficient) - bet) > 0) w.totalWin += (20 * coefficient) - bet;
             }
+            if (game == "blackjac") {
+                w.blackjackPlayed++;
+                w.totalBet += coefficient;
+                if (bet == 0) {
+                    w.blackjackDraw;
+                }
+                else if (result) {
+                w.balance += bet;
+                w.totalWin += bet;
+                w.blackjackWon++;
+            }
+                else w.balance -= coefficient;
+            }
             w.totalGamesPlayed = w.blackjackPlayed + w.simonPlayed + w.slotsPlayed;
             saveClients(client, size);
             break;
@@ -114,6 +128,7 @@ Clients* TempolaryDatabase(int& size) {
         clients1[0].totalGamesPlayed = 0;
         clients1[0].blackjackPlayed = 0;
         clients1[0].blackjackWon = 0;
+        clients1[0].blackjackDraw = 0;
         clients1[0].slotsPlayed = 0;
         clients1[0].slotWon = 0;
         clients1[0].simonPlayed = 0;
@@ -136,6 +151,7 @@ Clients* TempolaryDatabase(int& size) {
         fin >> clients[i].totalGamesPlayed;
         fin >> clients[i].blackjackPlayed;
         fin >> clients[i].blackjackWon;
+        fin >> clients[i].blackjackDraw;
         fin >> clients[i].slotsPlayed;
         fin >> clients[i].slotWon;
         fin >> clients[i].simonPlayed;
@@ -160,6 +176,7 @@ void saveClients(Clients* clients, int size) {
             << clients[i].totalGamesPlayed << " "
             << clients[i].blackjackPlayed << " "
             << clients[i].blackjackWon << " "
+            << clients[i].blackjackDraw << " "
             << clients[i].slotsPlayed << " "
             << clients[i].slotWon << " "
             << clients[i].simonPlayed << " "

@@ -9,6 +9,7 @@ struct Clients {
     int totalGamesPlayed;
     int blackjackPlayed;
     int blackjackWon;
+    int blackjackDraw;
     int slotsPlayed;
     int slotWon;
     int simonPlayed;
@@ -34,5 +35,5 @@ void blackjac(std::string login);
 void slots(std::string login);
 void simon(std::string login);
 void displaySimonGrid(int& score, std::string login);
-void CheckingMoney(Clients* client, std::string login, int size);
+void CheckingMoney(Clients* client, std::string login, int size, int bet);
 void userStatistics(Clients* client, int size, std::string login);
