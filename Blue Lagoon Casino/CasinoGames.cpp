@@ -1,0 +1,276 @@
+﻿#include "casino.h"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <chrono>
+#include <thread>
+#include <conio.h>
+using namespace std;
+void coefficientCalc(Coefficient* a, string* result, double bet, Clients* clients, int size, string& login) {
+    string game = "slots";
+    bool win = false;
+    if (result[0] == result[1] && result[1] == result[2]) {
+        win = true;
+        for (int i = 0; i < 5; i++) {
+            if (a[i].name == result[0]) {
+                EditClientsData(clients, size, game, login, win, bet, a[i].jackpot);
+                break;
+            }
+        }
+    }
+    else if (result[0] == result[1] || result[0] == result[2] || result[1] == result[2]) {
+        win = true;
+        for (int i = 0; i < 5; i++) {
+            if (a[i].name == result[0] || a[i].name == result[1] || a[i].name == result[2]) {
+                EditClientsData(clients, size, game, login, win, bet, a[i].twoMatch);
+                break;
+            }
+        }
+    }
+    else {
+        win = false;
+        EditClientsData(clients, size, game, login, win, bet, 1.0);
+    }
+}
+void blackjac(string login) {
+
+}
+void slots(string login) {
+    const int reels = 3, size = 5;
+    const string symbols[size]{ "@", "$", "&", "*", "7" };
+
+    string result[reels];
+    Coefficient coefficient[size]{
+    {"@",  9.5, 0.8},
+    {"$", 10.5, 1.0},
+    {"&", 12.0, 1.2},
+    {"*", 10.0, 0.9},
+    {"7", 10.5, 1.1}
+    };
+    int clientCount;
+    Clients* clients = TempolaryDatabase(clientCount);
+    CheckingMoney(clients, login, clientCount);
+    for (int i = 0; i < 7; i++) {
+        this_thread::sleep_for(chrono::milliseconds(300));
+        system("cls");
+        for (int j = 0; j < reels; j++) {
+            int r = rand() % size;
+            result[j] = symbols[r];
+        }
+        cout << "=====================" << endl
+            << "|   \033[36mSLOT MACHINE\033[0m    |" << endl
+            << "=====================" << endl
+            << "| |\033[35m " << result[0] << " \033[0m| |\033[35m "
+            << result[1] << " \033[0m| |\033[35m " << result[2]
+            << " \033[0m| |";
+        cout << "\n=====================" << endl;
+    }
+    if (result[0] == result[1] && result[1] == result[2])
+        cout << "|\033[32m     JACKPOT!      \033[0m|" << endl;
+    else if (result[0] == result[1] || result[0] == result[2] || result[1] == result[2])
+        cout << "|\033[32m     YOU WIN!      \033[0m|" << endl;
+    else
+        cout << "|\033[31m Better luck next  \033[0m|" << endl;
+    cout << "=====================" << endl;
+    double bet = 100;
+    coefficientCalc(coefficient, result, bet, clients, clientCount, login);
+    int player = 0;
+    for (int i = 0; i < clientCount; i++) {
+        Clients& w = clients[i];
+        if (login == w.login) {
+            player = i;
+            break;
+        }
+    }
+    cout << "Balance updated successfully.\n";
+    cout << "Your current balance: \033[33m"
+        << clients[player].balance
+        << " credits\033[0m\n";
+    cout << "---------------------\n";
+    cout << "Do you want to play again?\n";
+    cout << "[1] Yes, spin again\n";
+    cout << "[2] No, return to menu\n";
+    cout << "---------------------\n";
+    int restart;
+    cin >> restart;
+    if (restart == 1 || restart == 11 || restart == 111) {
+        slots(login);
+    }
+    cin.ignore();
+}
+void displaySimonGrid(int& score, string login) {
+    system("cls");
+    score = 0;
+    int size = 0;
+    int* arr = nullptr;
+    string* arr3 = nullptr;
+    bool playing = true;
+
+    int clientCount;
+    Clients* clients = TempolaryDatabase(clientCount);
+    CheckingMoney(clients, login, clientCount);
+
+    while (playing) {
+        string* newArr3 = new string[size + 1];
+        int* arr2 = new int[size + 1];
+        for (int i = 0; i < size; i++) {
+            arr2[i] = arr[i];
+            newArr3[i] = arr3[i];
+        }
+        arr2[size] = rand() % 9 + 1;
+        newArr3[size] = to_string(arr2[size]);
+        delete[] arr;
+        delete[] arr3;
+        arr = arr2;
+        arr3 = newArr3;
+        size++;
+        for (int i = 0; i < size; i++) {
+            string nums[9]{ "1","2","3","4","5","6","7","8","9" };
+            int r = arr[i] - 1;
+            system("cls");
+            cout << "=========================\n" << "|   \033[31m"
+                << nums[0] << "\033[0m   |   \033[32m"
+                << nums[1] << "\033[0m   |   \033[33m"
+                << nums[2] << "\033[0m   |\n" << "-------------------------\n" << "|   \033[34m"
+                << nums[3] << "\033[0m   |   \033[35m"
+                << nums[4] << "\033[0m   |   \033[36m"
+                << nums[5] << "\033[0m   |\n" << "-------------------------\n" << "|   \033[31m"
+                << nums[6] << "\033[0m   |   \033[32m"
+                << nums[7] << "\033[0m   |   \033[33m"
+                << nums[8] << "\033[0m   |\n"
+                << "=========================\n";
+            nums[r] = "*";
+            this_thread::sleep_for(chrono::milliseconds(400));
+            system("cls");
+            cout << "=========================\n" << "|   \033[31m"
+                << nums[0] << "\033[0m   |   \033[32m"
+                << nums[1] << "\033[0m   |   \033[33m"
+                << nums[2] << "\033[0m   |\n" << "-------------------------\n" << "|   \033[34m"
+                << nums[3] << "\033[0m   |   \033[35m"
+                << nums[4] << "\033[0m   |   \033[36m"
+                << nums[5] << "\033[0m   |\n" << "-------------------------\n" << "|   \033[31m"
+                << nums[6] << "\033[0m   |   \033[32m"
+                << nums[7] << "\033[0m   |   \033[33m"
+                << nums[8] << "\033[0m   |\n"
+                << "=========================\n";
+            this_thread::sleep_for(chrono::milliseconds(400));
+            nums[r] = to_string(r + 1);
+            system("cls");
+            cout << "=========================\n" << "|   \033[31m"
+                << nums[0] << "\033[0m   |   \033[32m"
+                << nums[1] << "\033[0m   |   \033[33m"
+                << nums[2] << "\033[0m   |\n" << "-------------------------\n" << "|   \033[34m"
+                << nums[3] << "\033[0m   |   \033[35m"
+                << nums[4] << "\033[0m   |   \033[36m"
+                << nums[5] << "\033[0m   |\n" << "-------------------------\n" << "|   \033[31m"
+                << nums[6] << "\033[0m   |   \033[32m"
+                << nums[7] << "\033[0m   |   \033[33m"
+                << nums[8] << "\033[0m   |\n"
+                << "=========================\n";
+        }
+        cout << "=========================\n";
+        cout << " Now repeat the sequence \n";
+        cout << "=========================\n";
+
+        string userInput;
+        while (userInput.size() < size) {
+            string temp;
+            getline(cin, temp);
+            temp.erase(remove(temp.begin(), temp.end(), ' '), temp.end());
+            userInput += temp;
+        }
+        bool correct = true;
+        if (userInput.size() != size) {
+            correct = false;
+            break;
+        }
+        for (int i = 0; i < size; i++) {
+            if (userInput[i] != arr3[i][0]) {
+                correct = false;
+                break;
+            }
+        }
+        if (!correct) playing = false;
+        else {
+            score++;
+            cout << "\nCorrect! Next round...\n";
+            this_thread::sleep_for(chrono::milliseconds(1000));
+        }
+    }
+    system("cls");
+    cout << "=========================\n";
+    cout << "        Game Over        \n";
+    cout << "Your final score: " << score << endl;
+    cout << "=========================\n";
+
+    int player = 0;
+    for (int i = 0; i < clientCount; i++) {
+        Clients& w = clients[i];
+        if (login == w.login) {
+            player = i;
+            break;
+        }
+    }
+    string game{ "simon" };
+    bool a = true;
+    int bet = 100;
+    double coefficient = score;
+    EditClientsData(clients, clientCount, game, login, a, bet, coefficient);
+    delete[] clients;
+    delete[] arr;
+    this_thread::sleep_for(chrono::seconds(3));
+}
+void simon(string login) {
+    cin.ignore();
+    int user, score = 0;
+    do
+    {
+        system("cls");
+        cout << "===============================\n"
+            << "|       \033[36mSIMON SAYS GAME\033[0m       |\n"
+            << "===============================\n"
+            << "Follow the sequence shown on screen!\n"
+            << "Press the corresponding keys when prompted.\n"
+            << "-------------------------------\n"
+            << "Current Score: \033[33m" << score << "\033[0m\n"
+            << "-------------------------------\n"
+            << "[1] Start Game\n"
+            << "[2] Return to Main Menu\n"
+            << "===============================\n";
+        cin >> user;
+        if (user == 1) displaySimonGrid(score, login);
+        else if (user == 2) break;
+    } while (true);
+}
+void CasinoGamesMenu(string login) {
+    int user;
+    do
+    {
+        system("cls");
+        cout << "====================================\n"
+            << "|         \033[36mCASINO GAME MENU\033[0m         |\n"
+            << "====================================\n"
+            << "Which game would you like to play? |\n"
+            << "------------------------------------\n"
+            << "[1] \033[35mBlackjack\033[0m\n"
+            << "[2] \033[33mSlots\033[0m\n"
+            << "[3] \033[32mSimon Says\033[0m\n"
+            << "[4] \033[34mStatistics\033[0m\n"
+            << "[5] Exit\n"
+            << "------------------------------------\n"
+            << "Enter the number of your choice: ";
+        cin.ignore();
+        cin >> user;
+        int a = 0,  clientCount;
+        Clients* clients = TempolaryDatabase(clientCount);
+        if (user == 1) blackjac(login);
+        else if (user == 2) slots(login);
+        else if (user == 3) simon(login);
+        else if (user == 4) userStatistics(clients, clientCount, login);
+        else if (user == 5) break;
+        else {
+            cout << "\033[31mInvalid input. Please enter a number from 1 to 4.\033[0m\n";
+            this_thread::sleep_for(chrono::seconds(2));
+        }
+    } while (true);
+}
