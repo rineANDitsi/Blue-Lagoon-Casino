@@ -91,8 +91,8 @@ void EditClientsData(Clients* client, int size, string game, string login, bool 
                     w.simonMaxScore = coefficient;
                 }
                 w.simonTotalScore += coefficient;
-                w.balance += (10 * coefficient) - bet;
-                if (((10 * coefficient) - bet) > 0) w.totalWin += (10 * coefficient) - bet;
+                w.balance += (20 * coefficient) - bet;
+                if (((20 * coefficient) - bet) > 0) w.totalWin += (20 * coefficient) - bet;
             }
             w.totalGamesPlayed = w.blackjackPlayed + w.simonPlayed + w.slotsPlayed;
             saveClients(client, size);
