@@ -74,7 +74,8 @@ int main()
         cin.ignore();
         cout << "Create a password: ";
         cin >> newClients[size].password;
-        newClients[size].id = size + 1;
+        long long id = size + 1;
+        newClients[size].id = id;
         newClients[size].login = login;
         newClients[size].balance = 1000;
         newClients[size].totalGamesPlayed = 0;
