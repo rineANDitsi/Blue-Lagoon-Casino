@@ -250,7 +250,6 @@ void slots(string login) {
     cout << "[2] No, return to menu\n";
     cout << "---------------------\n";
     string restart;
-    cin.ignore();
     restart = _getch();
     if (restart == "1") {
         slots(login);
