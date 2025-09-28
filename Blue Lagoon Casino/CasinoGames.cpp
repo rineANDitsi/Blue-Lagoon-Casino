@@ -4,6 +4,7 @@
 #include <string>
 #include <chrono>
 #include <thread>
+#include <iomanip>
 #include <conio.h>
 using namespace std;
 void coefficientCalc(Coefficient* a, string* result, double bet, Clients* clients, int size, string& login) {
@@ -74,9 +75,11 @@ void blackjac(string login) {
 
     bool playerTurn = true, win = true;
     double bet = 0;
+    int temBet = 20;
     double coefficient;
     int clientCount;
     Clients* clients = TempolaryDatabase(clientCount);
+    CheckingMoney(clients, login, clientCount, temBet);
     while (bet < 20) {
         system("cls");
         cout << "Enter your bet (minimum 20): ";
@@ -85,6 +88,7 @@ void blackjac(string login) {
             Clients& w = clients[i];
             if (w.login == login) {
                 if (bet > w.balance) {
+                    cout << fixed << setprecision(0);
                     cout << "Not enough funds! Your balance: " << w.balance << "\n";
                     bet = 0;
                     this_thread::sleep_for(chrono::milliseconds(1400));
@@ -168,13 +172,12 @@ void blackjac(string login) {
             }
             else if (checkP > 21 || (!playerBlackjack && checkP < checkDTotal && checkDTotal <= 21)) {
                 win = false;
-                bet = 0;
                 cout << "YOU LOSE!\n";
                 cout << "You lost " << coefficient << " chips.\n";
             }
             else {
-                bet = 0;
                 win = false;
+                bet = 0;
                 cout << "DRAW!\n";
                 cout << "Your bet is returned: " << coefficient << " chips.\n";
             }
@@ -240,6 +243,7 @@ void slots(string login) {
             break;
         }
     }
+    cout << fixed << setprecision(0);
     cout << "Balance updated successfully.\n";
     cout << "Your current balance: \033[33m"
         << clients[player].balance
@@ -414,7 +418,8 @@ void CasinoGamesMenu(string login) {
             << "[2] \033[33mSlots\033[0m\n"
             << "[3] \033[32mSimon Says\033[0m\n"
             << "[4] \033[34mStatistics\033[0m\n"
-            << "[5] Exit\n"
+            << "[5] \033[36mDodep (+1000)\033[0m\n"
+            << "[6] Exit\n"
             << "------------------------------------\n"
             << "Enter the number of your choice: ";
         cin >> user;
@@ -424,7 +429,20 @@ void CasinoGamesMenu(string login) {
         else if (user == 2) slots(login);
         else if (user == 3) simon(login);
         else if (user == 4) userStatistics(clients, clientCount, login);
-        else if (user == 5) break;
+        else if (user == 5) {
+            for (int i = 0; i < clientCount; i++) {
+                Clients& w = clients[i];
+                if (w.login == login) {
+                    w.balance += 1000;
+                    saveClients(clients, clientCount);
+                    cout << "\033[32mDodep successful! Your new balance: \033[0m"
+                        << w.balance << "\n";
+                    this_thread::sleep_for(chrono::seconds(2));
+                    break;
+                }
+            }
+        }
+        else if (user == 6) break;
         else {
             cout << "\033[31mInvalid input. Please enter a number from 1 to 4.\033[0m\n";
             this_thread::sleep_for(chrono::seconds(2));

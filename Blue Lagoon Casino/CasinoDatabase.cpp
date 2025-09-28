@@ -4,6 +4,7 @@
 #include <fstream>
 #include <chrono>
 #include <thread>
+#include <iomanip>
 #include <conio.h>
 using namespace std;
 int SizeOfFile() {
@@ -18,7 +19,7 @@ void CheckingMoney(Clients* client, string login, int size, int bet) {
     for (int i = 0; i < size; i++) {
         Clients& w = client[i];
         if (w.login == login) {
-            if (w.balance <= 0) {
+            if (w.balance <= bet) {
                 do
                 {
                     system("cls");
@@ -30,7 +31,7 @@ void CheckingMoney(Clients* client, string login, int size, int bet) {
                     string choice;
                     cin >> choice;
                     if (choice == "1") {
-                        w.balance = 1000 + w.balance;
+                        w.balance += 1000;
                         saveClients(client, size);
                     }
                 } while (w.balance < 100);
@@ -44,6 +45,7 @@ void userStatistics(Clients* client, int size, string login) {
     for (int i = 0; i < size; i++) {
         Clients& w = client[i];
         if (w.login == login) {
+            cout << fixed << setprecision(0);
             cout << "==============================\n"
                 << "   \033[36mPLAYER STATISTICS\033[0m\n"
                 << "==============================\n"
@@ -102,10 +104,10 @@ void EditClientsData(Clients* client, int size, string game, string login, bool 
                     w.blackjackDraw;
                 }
                 else if (result) {
-                w.balance += bet;
-                w.totalWin += bet;
-                w.blackjackWon++;
-            }
+                    w.balance += bet;
+                    w.totalWin += bet;
+                    w.blackjackWon++;
+                }
                 else w.balance -= coefficient;
             }
             w.totalGamesPlayed = w.blackjackPlayed + w.simonPlayed + w.slotsPlayed;
