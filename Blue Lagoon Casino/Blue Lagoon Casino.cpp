@@ -16,10 +16,12 @@ int main()
     while (user != 1 && user != 2) {
         cout << "Are you a new player or existing?\n";
         cout << "1. New player\n2. Existing player\nChoose 1 or 2: ";
-        cin >> user;
-        if (user != 1 && user != 2) {
+        if (!(cin >> user)) {
+            cin.clear();
+            cin.ignore(10000, '\n');
             system("cls");
             cout << "\033[31mInvalid input. Please enter 1 or 2.\033[0m\n";
+            this_thread::sleep_for(chrono::seconds(2));
         }
     }
     system("cls");
@@ -60,7 +62,13 @@ int main()
         do
         {
             cout << "Enter your age: ";
-            cin >> newClients[size].age;
+            if (!(cin >> newClients[size].age)) {
+                cin.clear();
+                cin.ignore(10000, '\n');
+                cout << "\033[31mInvalid input!\033[0m\n";
+                this_thread::sleep_for(chrono::seconds(2));
+                continue;
+            }
             if (newClients[size].age >= 90) {
                 cout << "\033[31mPeople don't live that long!\033[0m\n";
                 continue;

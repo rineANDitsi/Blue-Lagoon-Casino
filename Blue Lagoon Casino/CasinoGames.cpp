@@ -83,7 +83,13 @@ void blackjac(string login) {
     while (bet < 20) {
         system("cls");
         cout << "Enter your bet (minimum 20): ";
-        cin >> bet;
+        if (!(cin >> bet)) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cout << "\033[31mInvalid input!\033[0m\n";
+            this_thread::sleep_for(chrono::seconds(2));
+            continue;
+        }
         for (int i = 0; i < clientCount; i++) {
             Clients& w = clients[i];
             if (w.login == login) {
@@ -405,7 +411,6 @@ void simon(string login) {
 }
 void CasinoGamesMenu(string login) {
     int user;
-    cin.ignore();
     do
     {
         system("cls");
@@ -422,7 +427,13 @@ void CasinoGamesMenu(string login) {
             << "[6] Exit\n"
             << "------------------------------------\n"
             << "Enter the number of your choice: ";
-        cin >> user;
+        if (!(cin >> user)) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cout << "\033[31mInvalid input. Please enter a number from 1 to 4.\033[0m\n";
+            this_thread::sleep_for(chrono::seconds(2));
+            continue;
+        }
         int a = 0, clientCount;
         Clients* clients = TempolaryDatabase(clientCount);
         if (user == 1) blackjac(login);
